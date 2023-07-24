@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.BufferedInputStream;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -67,6 +68,41 @@ public class CompanyServiceTest {
                 .hasMessage("CNPJ já cadstrado.");
 
         Mockito.verify(repository, Mockito.never()).save(company);
+
+    }
+
+    @Test
+    @DisplayName("Deve Obter uma empresa por Id.")
+    public void getByIdTest(){
+
+        Long id = 1L;
+        Company company = createValidCompany();
+        company.setId(id);
+
+        Mockito.when(repository.findById(id)).thenReturn(Optional.of(company));
+
+        Optional<Company> foundCompany = service.getById(id);
+
+        assertThat(foundCompany.isPresent()).isTrue();
+        assertThat(foundCompany.get().getId()).isEqualTo(id);
+        assertThat(foundCompany.get().getCnpj()).isEqualTo(company.getCnpj());
+        assertThat(foundCompany.get().getCep()).isEqualTo(company.getCep());
+        assertThat(foundCompany.get().getNomeFantasia()).isEqualTo(company.getNomeFantasia());
+
+
+    }
+
+    @Test
+    @DisplayName("Deve retornar vazio ao buscar empresa por id não existente na base")
+    public void companyNotFoundById(){
+
+        Long id = 1L;
+
+        Mockito.when(repository.findById(id)).thenReturn(Optional.empty());
+
+        Optional<Company> company = service.getById(id);
+
+        assertThat(company.isPresent()).isFalse();
 
     }
 

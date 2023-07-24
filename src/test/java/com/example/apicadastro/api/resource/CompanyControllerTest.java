@@ -21,6 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Optional;
+
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -110,6 +112,140 @@ public class CompanyControllerTest {
                 .andExpect(jsonPath("errors[0]").value(messageError));
 
     }
+
+    @Test
+    @DisplayName("Deve obter informações de uma empresa ")
+    public void getCompanyDetail() throws Exception {
+
+        Long id = 1L;
+
+        Company company = Company.builder()
+                .id(id)
+                .nomeFantasia(createNewCompany().getNomeFantasia())
+                .cnpj(createNewCompany().getCnpj())
+                .cep(createNewCompany().getCep())
+                .build();
+
+        BDDMockito.given(service.getById(id)).willReturn(Optional.of(company));
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(COMPANY_API.concat("/" + id))
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("cnpj").value(createNewCompany().getCnpj()))
+                .andExpect(jsonPath("nomeFantasia").value(createNewCompany().getNomeFantasia()))
+                .andExpect(jsonPath("cep").value(createNewCompany().getCep()));
+
+    }
+
+    @Test
+    @DisplayName("Deve retornar resourse not found quando não encontrar uma empresa ")
+    public void companyNotFound() throws Exception {
+
+
+        BDDMockito.given(service.getById(Mockito.anyLong())).willReturn(Optional.empty());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(COMPANY_API.concat("/" + 1))
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc.perform(request)
+                .andExpect(status().isNotFound());
+
+    }
+    @Test
+    @DisplayName("Deve deletar uma empresa ")
+    public void deleteCompanyTest() throws Exception {
+
+
+        BDDMockito.given(service.getById(Mockito.anyLong())).willReturn(Optional.of(Company.builder().id(1L).build()));
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .delete(COMPANY_API.concat("/" + 1));
+
+        mvc.perform(request)
+                .andExpect(status().isNoContent());
+
+    }
+
+    @Test
+    @DisplayName("Deve retornar resource not found quando não encontrar uma empresa para deletar")
+    public void deleteNoExistCompanyTest() throws Exception {
+
+
+        BDDMockito.given(service.getById(Mockito.anyLong())).willReturn(Optional.empty());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .delete(COMPANY_API.concat("/" + 1));
+
+        mvc.perform(request)
+                .andExpect(status().isNotFound());
+
+    }
+
+    @Test
+    @DisplayName("Deve atualizar uma empresa")
+    public void updateCompanyTest() throws Exception {
+
+        Long id = 1L;
+        String json = new ObjectMapper().writeValueAsString(createNewCompany());
+
+        Company updatingCompany = Company.builder()
+                .id(id).nomeFantasia("algum nome").cnpj("123456").cep("000-111").build();
+
+        BDDMockito.given( service.getById(id) ).willReturn( Optional.of(updatingCompany) );
+
+        Company updatedCompany = Company.builder()
+                .id(id)
+                .cnpj("123456")
+                .nomeFantasia("minha Empresa")
+                .cep("000-000")
+                .build();
+        BDDMockito.given(service.update(updatingCompany)).willReturn(updatedCompany);
+
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(COMPANY_API.concat("/" + 1))
+                .content(json)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("cnpj").value(createNewCompany().getCnpj()))
+                .andExpect(jsonPath("nomeFantasia").value(createNewCompany().getNomeFantasia()))
+                .andExpect(jsonPath("cep").value(createNewCompany().getCep()));
+
+    }
+
+    @Test
+    @DisplayName("Deve retornar 404 ao tentar atualizar uma empresa inexistente")
+    public void updateNoExistentCompanyTest() throws Exception {
+
+        Long id = 1L;
+        String json = new ObjectMapper().writeValueAsString(createNewCompany());
+        BDDMockito.given( service.getById(id))
+                .willReturn(Optional.empty());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(COMPANY_API.concat("/" + 1L))
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(request)
+                .andExpect(status().isNotFound());
+
+    }
+
+
+
+
+
 
     private static CompanyDTO createNewCompany() {
         return CompanyDTO.builder()
