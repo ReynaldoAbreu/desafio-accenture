@@ -1,10 +1,9 @@
 package com.example.apicadastro.model.repository;
 
-import com.example.apicadastro.model.entity.Company;
+import com.example.apicadastro.model.entity.Supplier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CompanyRepository extends JpaRepository<Company, Long> {
-    boolean existsByCnpj(String cnpj);
+public interface SupplierRepository extends JpaRepository<Supplier, Long> {
 }

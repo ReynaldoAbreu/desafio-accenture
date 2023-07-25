@@ -14,10 +14,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.BufferedInputStream;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -103,6 +103,59 @@ public class CompanyServiceTest {
         Optional<Company> company = service.getById(id);
 
         assertThat(company.isPresent()).isFalse();
+
+    }
+
+    @Test
+    @DisplayName("Deve deletar uma empresa")
+    public void deleteTest(){
+
+        Company company = Company.builder().id(1L).build();
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow( () -> service.delete(company));
+
+        Mockito.verify(repository, Mockito.times(1)).delete(company);
+    }
+
+    @Test
+    @DisplayName("deve ocorrer erro ao tentar deletar uma empresa inexistente")
+    public void deleteNotExistCompany(){
+        Company company = new Company();
+
+        assertThrows( IllegalArgumentException.class, () -> service.delete(company) );
+
+        Mockito.verify(repository, Mockito.never()).delete(company);
+
+    }
+
+    @Test
+    @DisplayName("Deve atualizar uma empresa")
+    public void updateCompanyTest(){
+
+        Long id = 1L;
+        Company updatingCompany = Company.builder().id(id).build();
+
+        Company updatedCompany = createValidCompany();
+
+        Mockito.when(repository.save(updatingCompany)).thenReturn(updatedCompany);
+
+        Company company = service.update(updatingCompany);
+
+        assertThat(company.getId()).isEqualTo(updatedCompany.getId());
+        assertThat(company.getNomeFantasia()).isEqualTo(updatedCompany.getNomeFantasia());
+        assertThat(company.getCnpj()).isEqualTo(updatedCompany.getCnpj());
+        assertThat(company.getCep()).isEqualTo(updatedCompany.getCep());
+
+    }
+
+    @Test
+    @DisplayName("deve ocorrer erro ao tentar atualizar uma empresa inexistente")
+    public void updateInvalidCompany(){
+        Company company = new Company();
+
+        assertThrows( IllegalArgumentException.class, () -> service.update(company) );
+
+        Mockito.verify(repository, Mockito.never()).save(company);
 
     }
 

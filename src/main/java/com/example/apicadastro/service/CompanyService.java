@@ -8,9 +8,11 @@ import java.util.Optional;
 public interface CompanyService {
     Company save(Company company);
 
+    Company saveSupplier(Long idCompany, Long idSupplier);
+
     Optional<Company> getById(Long id);
 
-    void delete(Long id);
+    void delete(Company company);
 
     Company update(Company company);
 }
