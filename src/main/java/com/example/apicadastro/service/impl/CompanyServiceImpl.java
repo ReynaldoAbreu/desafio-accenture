@@ -5,7 +5,6 @@ import com.example.apicadastro.exception.BusinessException;
 import com.example.apicadastro.exception.ResourceNotFoundException;
 import com.example.apicadastro.model.AddressExternApi;
 import com.example.apicadastro.model.entity.Company;
-import com.example.apicadastro.model.entity.Supplier;
 import com.example.apicadastro.model.repository.CompanyRepository;
 import com.example.apicadastro.model.repository.SupplierRepository;
 import com.example.apicadastro.service.CompanyService;
@@ -18,7 +17,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -53,7 +52,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public Company saveSupplier(Long idCompany, Long idSupplier) {
+        public Company saveSupplier(Long idCompany, Long idSupplier) {
 
         String estado = "GO";
 
@@ -100,6 +99,11 @@ public class CompanyServiceImpl implements CompanyService {
         }
 
         return repository.save(company);
+    }
+
+    @Override
+    public List<Company> getAll() {
+        return repository.findAll();
     }
 
     //acabei utilizando o via cep para busca de endereço por cep, tive dificuldade em entender a api do cep lá.

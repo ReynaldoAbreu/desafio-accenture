@@ -9,16 +9,20 @@ import com.example.apicadastro.service.CompanyService;
 import com.example.apicadastro.service.SupplierService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/empresa")
+@CrossOrigin("http://localhost:4200")
 public class CompanyController {
 
     private final CompanyService service;
@@ -50,6 +54,13 @@ public class CompanyController {
         Company entity = service.saveSupplier(idCompany, idSupplier);
 
         return modelMapper.map(entity, CompanyDTO.class);
+
+    }
+
+    @GetMapping
+    public List<Company> getAll(){
+
+        return service.getAll();
 
     }
 
